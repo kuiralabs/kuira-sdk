@@ -44,50 +44,75 @@ equivalent) inside the `contract/` directory first.
 ## Step 1 — Sync the compiled artifacts into your app's assets
 
 The SDK's compact engine loads contract code + circuit keys from
-your APK's assets. Hand-roll a Gradle Copy task that runs before
-`mergeAssets`:
+your APK's assets. The `com.midnight.kuira.contract` Gradle plugin
+wires the canonical layout into `preBuild` for you:
 
-```kotlin title="app/build.gradle.kts"
-val contractDir = rootProject.file("contract")
-val contractManaged = file("$contractDir/src/managed/your-contract")
+=== "Gradle (Kotlin DSL)"
 
-val syncContractAssets = tasks.register<Copy>("syncContractAssets") {
-    from("$contractManaged/contract") {
-        include("index.js")
-        rename { "your-contract-contract.js" }   // (1)
-        into("runtime")
-    }
-    from("$contractManaged/keys") {
-        include("*.prover", "*.verifier")
-        into("keys")
-    }
-    from("$contractManaged/zkir") {
-        include("*.bzkir")
-        into("keys")
-    }
-    into("src/main/assets")
-
-    doFirst {
-        if (!contractManaged.exists()) {
-            throw GradleException(
-                "Contract not compiled at $contractManaged — run `npm run compact` first.",
-            )
+    ```kotlin title="settings.gradle.kts"
+    pluginManagement {
+        repositories {
+            gradlePluginPortal()
+            mavenCentral()                                                  // (1)
         }
     }
-}
+    ```
 
-tasks.named("preBuild") { dependsOn(syncContractAssets) }
-```
+    ```kotlin title="app/build.gradle.kts"
+    plugins {
+        id("com.android.application")
+        id("com.midnight.kuira.contract") version "0.1.0-alpha02"
+    }
 
-1. Rename to a stable name so multiple contracts can live alongside
-   each other in `assets/runtime/` without clobbering each other.
+    kuiraContract {
+        source.set("contract/src/managed/your-contract")
+        // alias.set("your-contract")                                       // (2)
+    }
+    ```
 
-!!! tip "Coming in alpha02"
-    The hand-rolled Copy task is the workaround. A
-    `com.midnight.kuira.contract` Gradle plugin (wishlist `#11`) is
-    on the alpha02 roadmap; declared as
-    `kuiraContract { source = "contract/src/managed/your-contract" }`,
-    it replaces the Copy block above.
+=== "Gradle (Groovy)"
+
+    ```groovy title="settings.gradle"
+    pluginManagement {
+        repositories {
+            gradlePluginPortal()
+            mavenCentral()                                                  // (1)
+        }
+    }
+    ```
+
+    ```groovy title="app/build.gradle"
+    plugins {
+        id 'com.android.application'
+        id 'com.midnight.kuira.contract' version '0.1.0-alpha02'
+    }
+
+    kuiraContract {
+        source.set('contract/src/managed/your-contract')
+        // alias.set('your-contract')                                       // (2)
+    }
+    ```
+
+1. The plugin ships to Maven Central. Add `mavenCentral()` to
+   `pluginManagement.repositories` so `plugins { id(...) }` can
+   resolve it. (A Gradle Plugin Portal listing is planned for
+   `alpha03` so this extra repo entry will go away.)
+2. `alias` is optional — defaults to the dirname of `source`. So
+   `contract/src/managed/penalty` resolves to alias `penalty`,
+   which lands the contract JS as
+   `assets/runtime/penalty-contract.js`.
+
+The plugin registers two tasks:
+
+- **`validateKuiraContractSource`** — verification task that always
+  runs and fails fast with a helpful message if the source directory
+  is missing (`"compile your contract first — npm run compact …"`).
+  Catches the "forgot to compile" mistake at build time, not at
+  runtime.
+- **`syncContractAssets`** — the actual copy: `contract/index.js`
+  → `assets/runtime/<alias>-contract.js`, `keys/*.{prover,verifier}`
+  and `zkir/*.bzkir` → `assets/keys/`. Wired into `preBuild` so it
+  runs automatically before any APK is assembled.
 
 **Verify:** after `./gradlew :app:assembleDebug`, unzip the resulting
 APK and confirm `assets/runtime/your-contract-contract.js`,
