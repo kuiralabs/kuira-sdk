@@ -88,5 +88,5 @@ Apache License 2.0 — see [LICENSE](LICENSE).
 
 ## Maintainer
 
-[Norman Lopez](https://github.com/nel349) — [kuiralabs@gmail.com](mailto:kuiralabs@gmail.com).
+[nel349](https://github.com/nel349) — [kuiralabs@gmail.com](mailto:kuiralabs@gmail.com).
 Security reports: see [SECURITY.md](SECURITY.md).
