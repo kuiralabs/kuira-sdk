@@ -1391,8 +1391,9 @@ to rely on during alpha.</p>
 <h2 id="verifying-releases">Verifying releases<a class="headerlink" href="#verifying-releases" title="Permanent link">&para;</a></h2>
 <p>Every Maven Central artifact is signed with the maintainer's PGP key. To
 verify a downloaded artifact:</p>
+<p><strong>Key fingerprint:</strong> <code>189C70EE67261AF5866CF1D052D6F3437CF490FA</code></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Fetch the public key</span>
-gpg<span class="w"> </span>--keyserver<span class="w"> </span>keyserver.ubuntu.com<span class="w"> </span>--recv-keys<span class="w"> </span>&lt;FILL<span class="w"> </span>IN:<span class="w"> </span><span class="m">40</span>-char<span class="w"> </span>fingerprint&gt;
+gpg<span class="w"> </span>--keyserver<span class="w"> </span>keyserver.ubuntu.com<span class="w"> </span>--recv-keys<span class="w"> </span>189C70EE67261AF5866CF1D052D6F3437CF490FA
 
 <span class="c1"># Download the artifact and its signature</span>
 <span class="nv">ARTIFACT</span><span class="o">=</span>midnight-sdk-0.1.0-alpha01.aar
@@ -1402,10 +1403,12 @@ curl<span class="w"> </span>-O<span class="w"> </span>https://repo1.maven.org/ma
 <span class="c1"># Verify</span>
 gpg<span class="w"> </span>--verify<span class="w"> </span><span class="nv">$ARTIFACT</span>.asc<span class="w"> </span><span class="nv">$ARTIFACT</span>
 </code></pre></div>
-<p>A successful verification output ends with
-<code>Good signature from "nel349 &lt;…&gt;"</code>. Any other outcome means the
-artifact does <strong>not</strong> correspond to a release the maintainer published —
-do not use it.</p>
+<p>A successful verification output names the key as
+<code>Good signature from "nel349 &lt;kuiralabs@gmail.com&gt;"</code>, optionally
+followed by an <code>aka</code> line for a secondary UID on the same key — both
+identify the maintainer. Any other outcome means the artifact does
+<strong>not</strong> correspond to a release the maintainer published — do not
+use it.</p>
 <p>The fingerprint is also published in this file and in the project's
 GitHub repository description, so an attacker would have to compromise
 both this repository and the keyserver to substitute a key undetected.</p>
