@@ -1116,23 +1116,31 @@ satisfies this; <code>ComponentActivity</code> alone does not.</p>
 <span class="k">import</span><span class="w"> </span><span class="nn">androidx.compose.runtime.Composable</span>
 <span class="k">import</span><span class="w"> </span><span class="nn">androidx.compose.ui.Modifier</span>
 <span class="k">import</span><span class="w"> </span><span class="nn">androidx.compose.ui.unit.dp</span>
-<span class="k">import</span><span class="w"> </span><span class="nn">androidx.hilt.navigation.compose.hiltViewModel</span>
 <span class="k">import</span><span class="w"> </span><span class="nn">com.midnight.kuira.dapp.sigil.SigilStatusPanel</span>
 
 <span class="nd">@Composable</span>
 <span class="kd">fun</span><span class="w"> </span><span class="nf">MainScreen</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Column</span><span class="p">(</span><span class="n">modifier</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Modifier</span><span class="p">.</span><span class="na">padding</span><span class="p">(</span><span class="m">16.</span><span class="n">dp</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="n">Text</span><span class="p">(</span><span class="s">&quot;My Midnight dApp&quot;</span><span class="p">)</span>
-<span class="w">        </span><span class="c1">// `viewModel` is the only required argument; pass an</span>
-<span class="w">        </span><span class="c1">// `onStatusChange` callback if you want to react to the</span>
-<span class="w">        </span><span class="c1">// sigil&#39;s state transitions (None → Creating → Forged, etc.).</span>
-<span class="w">        </span><span class="n">SigilStatusPanel</span><span class="p">(</span>
-<span class="w">            </span><span class="n">viewModel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hiltViewModel</span><span class="p">(),</span>
-<span class="w">            </span><span class="n">onStatusChange</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* status -&gt; ... */</span><span class="w"> </span><span class="p">},</span>
-<span class="w">        </span><span class="p">)</span>
+<span class="w">        </span><span class="c1">// Zero-arg call is the canonical drop-in: the SDK defaults</span>
+<span class="w">        </span><span class="c1">// `viewModel = hiltViewModel()`, `colors = SigilPanelColors.Default`,</span>
+<span class="w">        </span><span class="c1">// `modifier = Modifier`, and `onStatusChange = { }`.</span>
+<span class="w">        </span><span class="n">SigilStatusPanel</span><span class="p">()</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>If you want to react to sigil state transitions, pass an
+<code>onStatusChange</code> callback:</p>
+<div class="highlight"><pre><span></span><code><span class="n">SigilStatusPanel</span><span class="p">(</span>
+<span class="w">    </span><span class="n">onStatusChange</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">-&gt;</span>
+<span class="w">        </span><span class="c1">// status is com.midnight.kuira.dapp.sigil.SigilStatus,</span>
+<span class="w">        </span><span class="c1">// one of None / BackupAvailable / Creating / Forged / Error.</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>If you want to restyle the panel, pass a custom <code>SigilPanelColors</code>
+or a non-default <code>Modifier</code>. Both have sensible defaults; override
+only when you need to.</p>
 <p>Behaviourally, the panel renders one of four states:</p>
 <ul>
 <li><strong><code>None</code></strong> — no sigil on this device; surfaces a <strong>Forge</strong> button.</li>
