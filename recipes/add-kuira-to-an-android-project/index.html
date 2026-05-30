@@ -17,7 +17,7 @@
         <link rel="prev" href="../">
       
       
-        <link rel="next" href="../set-up-sigil-identity/">
+        <link rel="next" href="../bind-your-app-to-a-passkey-domain/">
       
       
         
@@ -749,6 +749,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../bind-your-app-to-a-passkey-domain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bind your app to a passkey domain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../set-up-sigil-identity/" class="md-nav__link">
         
   
@@ -1234,6 +1262,15 @@ you'll see a "missing binding for <code>PasskeyConfig</code>" error.</p>
 <p>Digital Asset Links bind your Android app's package name + signing
 cert to your passkey domain. Without this, the passkey API refuses
 to honour your <code>PasskeyConfig.rpId</code>.</p>
+<div class="admonition tip">
+<p class="admonition-title">This is the abbreviated path</p>
+<p>Use this if you're exploring with a debug build on a domain
+you already control. For release-signing config, CI signing
+with GitHub Actions secrets, multi-fingerprint setup (debug +
+release in one file), or hosting on Vercel / Cloudflare /
+custom nginx, see the full recipe:
+<a href="../bind-your-app-to-a-passkey-domain/">Bind your app to a passkey domain →</a>.</p>
+</div>
 <p>Find your app's SHA-256 cert fingerprint:</p>
 <div class="highlight"><pre><span></span><code>keytool<span class="w"> </span>-list<span class="w"> </span>-v<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-keystore<span class="w"> </span>~/.android/debug.keystore<span class="w"> </span><span class="se">\</span>

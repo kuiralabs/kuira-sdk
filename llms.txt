@@ -19,7 +19,8 @@ For browsable documentation: <https://kuiralabs.github.io/kuira-sdk-android/>.
 
 ## Recipes
 
-- [Add Kuira to an Android project](https://raw.githubusercontent.com/kuiralabs/kuira-sdk-android/main/docs/recipes/add-kuira-to-an-android-project.md): Install the SDK, register a passkey domain, host assetlinks.json, wire the Hilt module, enable debug cleartext for localnet.
+- [Add Kuira to an Android project](https://raw.githubusercontent.com/kuiralabs/kuira-sdk-android/main/docs/recipes/add-kuira-to-an-android-project.md): Install the SDK, set the passkey rpId, wire the Hilt module, enable debug cleartext for localnet. Links forward to the full passkey-domain-binding recipe for production signing setup.
+- [Bind your app to a passkey domain](https://raw.githubusercontent.com/kuiralabs/kuira-sdk-android/main/docs/recipes/bind-your-app-to-a-passkey-domain.md): Generate debug + release keystores, compose assetlinks.json with multi-fingerprint support, host on GitHub Pages / Vercel / Cloudflare / nginx, verify with curl + Google's Statement List Tester. Covers CI signing via GitHub Actions secrets and the full RP_ID_MISMATCH / PRF authentication failed troubleshooting matrix.
 - [Set up Sigil identity](https://raw.githubusercontent.com/kuiralabs/kuira-sdk-android/main/docs/recipes/set-up-sigil-identity.md): Bootstrap a passkey-derived sigil session (DID + wallet seed from one biometric), drop in the Compose panel, handle forge and restore flows.
 - [Deploy and call a Compact contract](https://raw.githubusercontent.com/kuiralabs/kuira-sdk-android/main/docs/recipes/deploy-and-call-a-compact-contract.md): Sync compiled `.compact` artifacts into Android assets, build the contract handle with witnesses, deploy, and call a circuit.
 
