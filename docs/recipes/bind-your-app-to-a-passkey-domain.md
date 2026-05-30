@@ -131,9 +131,32 @@ keytool -genkey -v \
   -validity 10000
 ```
 
-Answer the prompts (name, org, locality, two letters for country). You
-end up with `release.keystore` in the current directory — move it
-somewhere outside your repo.
+`keytool` walks you through six X.500 Distinguished-Name prompts. They
+populate the cert's subject metadata.
+
+!!! info "What to type at each prompt"
+    **Android signing never surfaces any of these fields anywhere** —
+    the Play Store, OS verifier, and `assetlinks.json` all match on the
+    SHA-256 fingerprint, not the DN. Pick values you'll be happy to
+    read later in `keytool -list -v` output; functionally, any value
+    works (including pressing Enter to leave `[Unknown]`).
+
+    | Prompt | Field | Suggested value |
+    |---|---|---|
+    | First and last name | `CN` (Common Name) | Your name or company name |
+    | Organizational unit | `OU` | A team or department (e.g. `Engineering`, `Mobile`). Blank is fine. |
+    | Organization | `O` | The legal/parent entity (your LLC, company name, or just your name for a solo project). |
+    | City or locality | `L` | Your city. Blank is fine. |
+    | State or province | `ST` | Your state. Blank is fine. |
+    | Two-letter country code | `C` | ISO 3166-1 alpha-2 (`US`, `MX`, `GB`, …). `keytool` validates this is exactly two letters. |
+
+    **OU vs O.** "Organization" is the umbrella entity; "organizational
+    unit" is a sub-group inside it. For a one-person or single-team
+    project both fields commonly end up the same — that's fine.
+
+You end up with `release.keystore` in the current directory — move it
+somewhere outside your repo (`~/keystores/` is a common spot) before
+the next step.
 
 ### Wire it into Gradle without committing secrets
 
