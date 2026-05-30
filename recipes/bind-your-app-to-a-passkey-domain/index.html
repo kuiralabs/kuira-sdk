@@ -1138,7 +1138,7 @@ Discover context first: run `git remote -v` in the project. Take the GitHub user
 Then execute the four-step recipe:
 1. `./gradlew :app:signingReport` to capture the debug-variant SHA-256 (add `--no-configuration-cache` if the project sets `org.gradle.configuration-cache=true`).
 2. Compose a single-fingerprint assetlinks.json with the project's applicationId and that SHA-256.
-3. Commit it to `<that-slug>/<that-slug>.github.io` at `.well-known/assetlinks.json`; if that repo also already hosts assetlinks for other apps, append a new target rather than overwriting.
+3. Commit it to `<that-slug>/<that-slug>.github.io` at `.well-known/assetlinks.json`; if that repo also already hosts assetlinks for other apps, append a new target rather than overwriting. **If you're creating that repo fresh, also commit an empty `.nojekyll` file at the repo root — without it, Jekyll silently strips the `.well-known/` path from the Pages build and the URL returns 404 even though the file is in the repo.**
 4. Set PASSKEY_RP_ID in the project's PasskeyConfig module to the chosen domain. Verify with `curl -I` against the live URL; then have the consumer reinstall the debug APK and tap Forge.
 
 After EACH step, output a one-sentence summary of what just happened so the human can follow without reading every tool result. Pause for explicit approval before any git push to a repo other than the project itself, and before any adb install / uninstall.
@@ -1240,17 +1240,41 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 git<span class="w"> </span>push
 </code></pre></div>
 <h3 id="case-b-the-backing-repo-doesnt-exist-yet">Case B — the backing repo doesn't exist yet<a class="headerlink" href="#case-b-the-backing-repo-doesnt-exist-yet" title="Permanent link">&para;</a></h3>
-<p>Create it, drop the JSON in, push, enable Pages:</p>
+<p>Create it, drop the JSON in <strong>plus a <code>.nojekyll</code> marker</strong>, push, enable
+Pages:</p>
 <div class="highlight"><pre><span></span><code>gh<span class="w"> </span>repo<span class="w"> </span>create<span class="w"> </span>&lt;user-or-org&gt;/&lt;user-or-org&gt;.github.io<span class="w"> </span>--public<span class="w"> </span>--add-readme
 gh<span class="w"> </span>repo<span class="w"> </span>clone<span class="w"> </span>&lt;user-or-org&gt;/&lt;user-or-org&gt;.github.io
 <span class="nb">cd</span><span class="w"> </span>&lt;user-or-org&gt;.github.io
 mkdir<span class="w"> </span>-p<span class="w"> </span>.well-known
 <span class="c1"># Write .well-known/assetlinks.json with the JSON from Step 2.</span>
+touch<span class="w"> </span>.nojekyll
 git<span class="w"> </span>add<span class="w"> </span>.<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;host assetlinks.json&quot;</span>
 git<span class="w"> </span>push
 </code></pre></div>
-<p>Then enable Pages via the repo's <strong>Settings → Pages → Source: <code>main</code></strong>
-(or via <code>gh api -X POST /repos/&lt;user-or-org&gt;/&lt;user-or-org&gt;.github.io/pages -f source[branch]=main</code>).</p>
+<div class="admonition danger">
+<p class="admonition-title">Why <code>.nojekyll</code> matters</p>
+<p>GitHub Pages's default static-site processor is Jekyll, which
+<strong>silently excludes every dot-prefixed path</strong> from the build
+output. Without <code>.nojekyll</code>, <code>.well-known/assetlinks.json</code> is in
+your repo and visible in the GitHub web UI, but the deployed Pages
+site returns <code>HTTP 404</code> for it.</p>
+<p>Adding an empty <code>.nojekyll</code> file at the repo root tells Pages to
+skip Jekyll entirely and serve the repo's files verbatim. This is
+the universal fix for any Pages site that hosts a <code>.well-known/*</code>
+path — App Links, passkey assetlinks, ACME challenge files,
+<code>security.txt</code>, etc.</p>
+<p>Symptom if you forget: the apex <code>https://&lt;name&gt;.github.io/</code>
+returns 200 (Pages is live), the file is present in the repo,
+but <code>curl -I https://&lt;name&gt;.github.io/.well-known/assetlinks.json</code>
+returns 404. Add <code>.nojekyll</code> and re-push to fix; the deploy
+re-runs in ~30 seconds.</p>
+</div>
+<p>For <code>&lt;user-or-org&gt;/&lt;user-or-org&gt;.github.io</code> repos, GitHub Pages
+auto-enables on the default branch. If for some reason it didn't:
+<strong>Settings → Pages → Source: <code>main</code></strong> in the repo UI, or via API:</p>
+<div class="highlight"><pre><span></span><code>gh<span class="w"> </span>api<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s1">&#39;/repos/&lt;user-or-org&gt;/&lt;user-or-org&gt;.github.io/pages&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-f<span class="w"> </span><span class="s1">&#39;source[branch]=main&#39;</span><span class="w"> </span>-f<span class="w"> </span><span class="s1">&#39;source[path]=/&#39;</span>
+</code></pre></div>
 <p>Either way: GitHub Pages serves <code>.json</code> as <code>application/json</code> by
 default — no extra config. The file is live at
 <code>https://&lt;user-or-org&gt;.github.io/.well-known/assetlinks.json</code> within
@@ -1320,7 +1344,13 @@ devices. After hosting changes or rpId changes, always
 <li><code>301</code> / <code>302</code> — passkey API doesn't follow redirects; fix the redirect</li>
 <li><code>403</code> / <code>401</code> — allow <code>/.well-known/*</code> through your auth</li>
 <li><code>content-type: text/html</code> — force <code>application/json</code> via your hosting config</li>
-<li><code>404</code> — file not deployed, or your <code>rpId</code> doesn't match the hostname you <code>curl</code>ed</li>
+<li><code>404</code> on GitHub Pages, file IS in the repo — Jekyll silently stripped
+  the <code>.well-known/</code> dotfile path. Add an empty <code>.nojekyll</code> at repo
+  root, push, wait ~30s for redeploy (see Step 3 Case B for the full
+  explanation)</li>
+<li><code>404</code>, file is NOT in the repo / wrong hostname — re-check your push
+  landed on the served branch, and that the <code>rpId</code> matches the
+  hostname you <code>curl</code>ed</li>
 </ul>
 <p>If the <code>curl</code> looks clean and Forge still fails, paste your hosting URL
 + package name + fingerprint into Google's
