@@ -212,11 +212,11 @@ authentication failed`, and silent biometric-prompt dismissal.
 
 This is its own walkthrough — picking the right repo to host the file
 in is the part most people get stuck on, and it's not obvious from
-the GitHub Pages URL alone.
+the GitHub Pages URL alone. The dedicated recipe covers fingerprint
+extraction, which GitHub repo backs which `rpId`, hosting, and
+verification.
 
-**Full recipe:** [Bind your app to a passkey domain →](bind-your-app-to-a-passkey-domain.md).
-Covers fingerprint extraction, which GitHub repo backs which `rpId`,
-hosting + verification.
+[Open the full recipe :material-arrow-right:](bind-your-app-to-a-passkey-domain.md){ .md-button .md-button--primary }
 
 You can skip this step temporarily — your app will compile and the
 SDK won't crash, but **Forge will fail** until `assetlinks.json` is
