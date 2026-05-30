@@ -43,9 +43,9 @@ agent and let it execute the recipe in your project.
 
     ---
 
-    Generate keystores (debug + release), compose `assetlinks.json` with
-    multi-fingerprint support, host it on GitHub Pages / Vercel /
-    Cloudflare, verify the binding.
+    Get the debug signing fingerprint, write a single-fingerprint
+    `assetlinks.json`, host it on your `rpId`, verify Forge works on
+    device. Development-only — release-signing is its own future recipe.
 
 -   :material-fingerprint: **[Set up Sigil identity](set-up-sigil-identity.md)**
 
